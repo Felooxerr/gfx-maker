@@ -16,7 +16,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 3
 .hero{text-align:center;padding:64px 20px 44px;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(124,92,252,0.2),transparent 70%)}
 .hero h1{font-size:clamp(2rem,5.5vw,3.8rem);font-weight:900;line-height:1.08;letter-spacing:-1.5px;margin-bottom:14px}
 .hero h1 em{font-style:normal;background:linear-gradient(135deg,#7c5cfc,#fc5cf5,#fc8c5c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:var(--muted);font-size:1.05rem;max-width:460px;margin:0 auto 10px;line-height:1.6}
+.hero p{color:var(--muted);font-size:1.05rem;max-width:500px;margin:0 auto 10px;line-height:1.6}
 .wrap{max-width:1060px;margin:0 auto;padding:0 20px 80px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:28px 32px;margin-bottom:16px}
 .card-header{display:flex;align-items:center;gap:11px;margin-bottom:20px}
@@ -30,7 +30,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 3
 .btn{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);border:none;border-radius:12px;padding:13px 24px;color:#fff;font-weight:700;font-size:.95rem;font-family:inherit;cursor:pointer;transition:opacity .2s,transform .15s;box-shadow:0 4px 18px rgba(124,92,252,.32)}
 .btn:hover{opacity:.9;transform:translateY(-2px)}
 .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
-.hint{color:var(--muted);font-size:.81rem;margin-top:9px}
+.hint{color:var(--muted);font-size:.81rem;margin-top:9px;line-height:1.6}
+.hint a{color:var(--accent);text-decoration:none}
 .err{color:#ff6b7a;font-size:.83rem;margin-top:9px;padding:9px 13px;background:rgba(255,107,122,.1);border:1px solid rgba(255,107,122,.22);border-radius:9px;display:none}
 .ok{display:none;align-items:center;gap:7px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);color:#10b981;border-radius:20px;padding:6px 14px;font-size:.81rem;font-weight:700;margin-top:9px}
 .pose-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px}
@@ -85,6 +86,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;heigh
 .api-key-row{margin-bottom:10px}
 .api-note{color:var(--muted);font-size:.78rem;line-height:1.5;padding:10px 14px;background:rgba(124,92,252,.06);border:1px solid rgba(124,92,252,.15);border-radius:10px;margin-top:10px}
 .api-note a{color:var(--accent);text-decoration:none}
+.id-tip{background:rgba(124,92,252,.08);border:1px solid rgba(124,92,252,.2);border-radius:12px;padding:12px 16px;margin-top:12px;font-size:.82rem;color:var(--muted);line-height:1.6}
+.id-tip strong{color:var(--text)}
 footer{text-align:center;padding:34px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem}
 footer span{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
 </style>
@@ -96,23 +99,34 @@ footer span{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);-webkit-backgroun
 </nav>
 <div class="hero">
   <h1>Make Your Avatar<br/><em>Look Legendary</em></h1>
-  <p>WebGL shaders + optional AI enhancement for that true GFX look.</p>
+  <p>Enter your Roblox User ID to load your avatar, pick a pose, and apply real WebGL shaders.</p>
 </div>
 <div class="wrap">
+
+  <!-- STEP 1 -->
   <div class="card">
     <div class="card-header">
       <div class="step-dot">1</div>
-      <div class="card-title">🔍 Search Roblox Avatar</div>
-      <div class="card-sub">Official Roblox API</div>
+      <div class="card-title">🔍 Enter Your Roblox User ID</div>
+      <div class="card-sub">Numbers only</div>
     </div>
     <div class="row">
-      <input class="inp" id="uname" type="text" placeholder="Enter Roblox username…" autocomplete="off"/>
-      <button class="btn" id="searchBtn" onclick="doSearch()">Search</button>
+      <input class="inp" id="userId" type="number" placeholder="e.g. 156 (Builderman's ID)" autocomplete="off"/>
+      <button class="btn" id="loadBtn" onclick="loadAvatar()">Load</button>
     </div>
-    <div class="err" id="errMsg">❌ Username not found. Check spelling and try again.</div>
-    <div class="ok" id="okMsg">✅ <span id="okName"></span></div>
-    <p class="hint">💡 Try: Builderman, ROBLOX, or any public username</p>
+    <div class="err" id="errMsg">❌ Could not load avatar. Check the ID and try again.</div>
+    <div class="ok" id="okMsg">✅ <span id="okName">Avatar loaded!</span></div>
+    <div class="id-tip">
+      <strong>How to find your User ID:</strong><br/>
+      1. Go to <strong>roblox.com</strong> and open your profile<br/>
+      2. Look at the URL — it says <strong>roblox.com/users/YOUR_ID/profile</strong><br/>
+      3. Copy just the number and paste it here<br/>
+      <br/>
+      <strong>Example IDs to try:</strong> 156 (Builderman) · 1 (Roblox) · 261 (Shedletsky)
+    </div>
   </div>
+
+  <!-- STEP 2 -->
   <div class="card">
     <div class="card-header">
       <div class="step-dot">2</div>
@@ -125,6 +139,8 @@ footer span{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);-webkit-backgroun
       <button class="pose-btn" id="pose-action" onclick="setPose('action')"><div class="pi">⚡</div><div class="pn">Action</div><div class="pd">Power stance</div></button>
     </div>
   </div>
+
+  <!-- STEP 3 -->
   <div class="card">
     <div class="card-header">
       <div class="step-dot">3</div>
@@ -186,6 +202,8 @@ footer span{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);-webkit-backgroun
     </div>
     <button class="genbtn" id="genBtn" onclick="generate()" disabled>🎨 Generate GFX</button>
   </div>
+
+  <!-- PREVIEW -->
   <div class="card">
     <div class="card-header">
       <div class="step-dot">✓</div>
@@ -193,7 +211,7 @@ footer span{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);-webkit-backgroun
     </div>
     <div class="preview-wrap">
       <div class="pgrid"></div>
-      <div class="ph" id="ph"><div class="phi">🎮</div><p>Your GFX will appear here</p><small style="color:var(--muted)">Search an avatar and hit Generate</small></div>
+      <div class="ph" id="ph"><div class="phi">🎮</div><p>Your GFX will appear here</p><small style="color:var(--muted)">Enter your User ID and hit Generate</small></div>
       <div class="spin" id="spin"></div>
       <div class="spin-label" id="spinLabel"></div>
       <canvas id="glCanvas"></canvas>
@@ -255,71 +273,58 @@ function pickGloss(hex,el){document.querySelectorAll('#glossColors .sw').forEach
 function pickBg(b,el){S.bg=b;document.querySelectorAll('#bgSwatches .sw').forEach(s=>s.classList.remove('active'));el.classList.add('active');liveRender();}
 function pickSize(w,h,el){S.W=w;S.H=h;document.querySelectorAll('#sizeTabs .stab').forEach(t=>t.classList.remove('active'));el.classList.add('active');if(S.generated){if(S.animId)cancelAnimationFrame(S.animId);S.animId=null;initGL();}}
 function liveRender(){if(S.generated&&!S.animId)S.animId=requestAnimationFrame(loop);}
-document.getElementById('uname').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+document.getElementById('userId').addEventListener('keydown',e=>{if(e.key==='Enter')loadAvatar();});
 
-// ── SEARCH — tries 3 proxies in order ──
-const PROXIES=[
-  u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
-  u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u=>u
-];
+// ── LOAD BY USER ID — no API needed, direct image URL ──
+async function loadAvatar(){
+  const uid=document.getElementById('userId').value.trim();
+  if(!uid||isNaN(uid))return;
+  const btn=document.getElementById('loadBtn'),err=document.getElementById('errMsg'),ok=document.getElementById('okMsg');
+  err.style.display='none';ok.style.display='none';
+  btn.disabled=true;btn.textContent='Loading…';
+  S.userId=uid;
+  S.username='User'+uid;
 
-async function fetchWithProxy(url,opts,proxyIdx=0){
-  const proxied=PROXIES[proxyIdx](url);
-  try{
-    const r=await fetch(proxied,opts);
-    if(!r.ok)throw new Error('bad status');
-    return r;
-  }catch(e){
-    if(proxyIdx<PROXIES.length-1)return fetchWithProxy(url,opts,proxyIdx+1);
-    throw e;
+  // Direct CDN thumbnail URL — no API call needed, no CORS issues
+  const sizes=['420x420','352x352','300x300'];
+  let loaded=false;
+
+  for(const size of sizes){
+    const url=`https://www.roblox.com/headshot-thumbnail/image?userId=${uid}&width=${size.split('x')[0]}&height=${size.split('x')[1]}&format=png`;
+    const worked=await tryLoadImage(url);
+    if(worked){loaded=true;break;}
   }
+
+  // fallback: try avatar full body thumbnail
+  if(!loaded){
+    const url=`https://www.roblox.com/bust-thumbnail/image?userId=${uid}&width=420&height=420&format=png`;
+    const worked=await tryLoadImage(url);
+    if(worked)loaded=true;
+  }
+
+  if(!loaded){
+    err.style.display='block';btn.disabled=false;btn.textContent='Load';
+    return;
+  }
+
+  btn.textContent='Load';btn.disabled=false;
+  ok.style.display='flex';
+  document.getElementById('okName').textContent=`Avatar loaded! User ID: ${uid}`;
+  document.getElementById('genBtn').disabled=false;
 }
 
-async function doSearch(){
-  const uname=document.getElementById('uname').value.trim();
-  if(!uname)return;
-  const btn=document.getElementById('searchBtn'),err=document.getElementById('errMsg'),ok=document.getElementById('okMsg');
-  err.style.display='none';ok.style.display='none';btn.disabled=true;btn.textContent='Searching…';
-  try{
-    // Step 1: get user ID
-    const r=await fetchWithProxy(
-      'https://users.roblox.com/v1/usernames/users',
-      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usernames:[uname],excludeBannedUsers:true})}
-    );
-    const d=await r.json();
-    const user=d.data?.[0];
-    if(!user)throw new Error('not found');
-    S.userId=user.id; S.username=user.name;
-
-    // Step 2: get avatar thumbnail
-    const thumbUrl=`https://thumbnails.roblox.com/v1/users/avatar?userIds=${user.id}&size=420x420&format=Png&isCircular=false`;
-    const tr=await fetchWithProxy(thumbUrl,{});
-    const td=await tr.json();
-    const imgUrl=td.data?.[0]?.imageUrl;
-    if(!imgUrl)throw new Error('no image');
-
-    // Step 3: load image
-    const img=new Image();img.crossOrigin='anonymous';
+function tryLoadImage(url){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
     img.onload=()=>{
-      S.avatarImg=img;
-      document.getElementById('genBtn').disabled=false;
-      btn.textContent='Search';btn.disabled=false;
-      ok.style.display='flex';
-      document.getElementById('okName').textContent='Found: '+S.username;
+      if(img.width>10){S.avatarImg=img;resolve(true);}
+      else resolve(false);
     };
-    img.onerror=()=>{
-      // try loading via proxy
-      const img2=new Image();
-      img2.crossOrigin='anonymous';
-      img2.onload=()=>{S.avatarImg=img2;document.getElementById('genBtn').disabled=false;btn.textContent='Search';btn.disabled=false;ok.style.display='flex';document.getElementById('okName').textContent='Found: '+S.username;};
-      img2.onerror=()=>{S.avatarImg=null;document.getElementById('genBtn').disabled=false;btn.textContent='Search';btn.disabled=false;ok.style.display='flex';document.getElementById('okName').textContent='Found: '+S.username+' (avatar preview limited)';};
-      img2.src=`https://corsproxy.io/?${encodeURIComponent(imgUrl)}`;
-    };
-    img.src=imgUrl;
-  }catch(e){
-    err.style.display='block';btn.disabled=false;btn.textContent='Search';
-  }
+    img.onerror=()=>resolve(false);
+    img.src=url;
+    setTimeout(()=>resolve(false),5000);
+  });
 }
 
 async function generate(){
@@ -438,7 +443,7 @@ function applyAIEnhancement(source,p){
   const g3=ctx.createRadialGradient(S.W/2,S.H/2,S.H*.25,S.W/2,S.H/2,S.H*.85);
   g3.addColorStop(0,'rgba(0,0,0,0)');g3.addColorStop(1,`rgba(0,0,0,${p.vignetteStrength||.4})`);
   ctx.fillStyle=g3;ctx.fillRect(0,0,S.W,S.H);
-  if(S.username){ctx.font=`600 ${Math.round(S.W*.017)}px Inter`;ctx.fillStyle='rgba(255,255,255,.25)';ctx.textAlign='right';ctx.fillText(`@${S.username} · AvatarGFX`,S.W-14,S.H-14);}
+  if(S.username){ctx.font=`600 ${Math.round(S.W*.017)}px Inter`;ctx.fillStyle='rgba(255,255,255,.25)';ctx.textAlign='right';ctx.fillText(`@User${S.userId} · AvatarGFX`,S.W-14,S.H-14);}
   document.getElementById('glCanvas').style.display='none';
   c.style.display='block';
   document.getElementById('dlBtn').disabled=false;
@@ -470,9 +475,8 @@ function doDownload(){
   const aiC=document.getElementById('aiCanvas'),glC=document.getElementById('glCanvas');
   const canvas=aiC.style.display!=='none'?aiC:glC;
   const exp=document.createElement('canvas');exp.width=S.W;exp.height=S.H;exp.getContext('2d').drawImage(canvas,0,0);
-  const a=document.createElement('a');a.download=`${S.username||'avatar'}-gfx-${S.W}x${S.H}.png`;a.href=exp.toDataURL('image/png');a.click();
+  const a=document.createElement('a');a.download=`avatar-${S.userId}-gfx-${S.W}x${S.H}.png`;a.href=exp.toDataURL('image/png');a.click();
 }
 </script>
 </body>
 </html>
-
