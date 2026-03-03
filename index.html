@@ -1,320 +1,416 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>GFX Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AvatarGFX</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+:root{--bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c27;--border:#2a2a3a;--accent:#7c5cfc;--text:#f0f0ff;--muted:#8888aa}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;gap:20px}
-h2{color:#fff;font-size:1.1rem;opacity:.6}
-canvas{border-radius:16px;box-shadow:0 0 80px rgba(124,92,252,.4)}
-.btns{display:flex;gap:12px}
-button{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);border:none;border-radius:10px;padding:12px 28px;color:#fff;font-weight:700;font-size:.95rem;cursor:pointer}
-label{background:#1c1c27;border:1px solid #2a2a3a;border-radius:10px;padding:12px 28px;color:#fff;font-weight:700;font-size:.95rem;cursor:pointer}
-input[type=file]{display:none}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 36px;border-bottom:1px solid var(--border);background:rgba(10,10,15,0.92);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+.logo{font-size:1.45rem;font-weight:900;background:linear-gradient(135deg,#7c5cfc,#fc5cf5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo b{-webkit-text-fill-color:#f0f0ff}
+.nav-pill{background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);color:var(--accent);border-radius:20px;padding:5px 14px;font-size:0.73rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.hero{text-align:center;padding:64px 20px 44px;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(124,92,252,0.2),transparent 70%)}
+.hero h1{font-size:clamp(2rem,5.5vw,3.8rem);font-weight:900;line-height:1.08;letter-spacing:-1.5px;margin-bottom:14px}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,#7c5cfc,#fc5cf5,#fc8c5c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:1.05rem;max-width:500px;margin:0 auto;line-height:1.6}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px 80px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:28px 32px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+.step-dot{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c5cfc,#fc5cf5);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;flex-shrink:0;color:#fff}
+.card-title{font-size:1.1rem;font-weight:700}
+.card-sub{color:var(--muted);font-size:0.8rem;margin-left:auto}
+.upload-zone{border:2px dashed var(--border);border-radius:16px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(124,92,252,.06)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:2.6rem;margin-bottom:10px}
+.upload-title{font-size:.95rem;font-weight:700;margin-bottom:5px}
+.upload-sub{color:var(--muted);font-size:.8rem}
+.upload-preview{display:none;align-items:center;gap:14px;padding:14px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:12px;margin-top:12px}
+.upload-preview img{width:52px;height:52px;border-radius:10px;object-fit:cover}
+.upload-preview-name{font-size:.86rem;font-weight:700;color:#10b981}
+.upload-preview-size{font-size:.74rem;color:var(--muted)}
+.hint{color:var(--muted);font-size:.81rem;margin-top:9px}
+.pose-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px}
+.pose-btn{background:var(--surface2);border:2px solid var(--border);border-radius:15px;padding:14px;color:var(--text);font-family:inherit;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center}
+.pose-btn:hover{border-color:var(--accent);background:rgba(124,92,252,.08);transform:translateY(-2px)}
+.pose-btn.active{border-color:var(--accent);background:rgba(124,92,252,.18)}
+.pi{font-size:1.8rem;line-height:1}.pn{font-size:.86rem;font-weight:700}.pd{font-size:.72rem;color:var(--muted)}
+.pose-btn.active .pd{color:rgba(255,255,255,.5)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:580px){.grid2{grid-template-columns:1fr}}
+.ctrl label{font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.sv{color:var(--accent);font-weight:800;font-size:.84rem}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;background:var(--border);border-radius:3px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;background:linear-gradient(135deg,#7c5cfc,#fc5cf5);border-radius:50%;cursor:pointer;box-shadow:0 2px 8px rgba(124,92,252,.5)}
+.div{height:1px;background:var(--border);margin:20px 0}
+.swrow{display:flex;gap:7px;flex-wrap:wrap}
+.sw{width:32px;height:32px;border-radius:8px;cursor:pointer;border:2.5px solid transparent;transition:transform .15s,border-color .15s;position:relative}
+.sw:hover{transform:scale(1.18)}
+.sw.active{border-color:#fff}
+.sw.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.sizetabs{display:flex;gap:7px;flex-wrap:wrap}
+.stab{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px 14px;font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;line-height:1.4}
+.stab.active{border-color:var(--accent);color:var(--text);background:rgba(124,92,252,.12)}
+.genbtn{width:100%;padding:17px;font-size:1.05rem;margin-top:22px;background:linear-gradient(135deg,#7c5cfc,#fc5cf5);border:none;border-radius:13px;color:#fff;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 4px 22px rgba(124,92,252,.35)}
+.genbtn:hover{opacity:.9;transform:translateY(-2px)}
+.genbtn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.preview-wrap{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:18px;overflow:hidden;min-height:440px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#c{position:relative;z-index:2;max-width:100%;border-radius:10px;display:none}
+.ph{position:relative;z-index:2;text-align:center;color:var(--muted);padding:40px}
+.phi{font-size:4rem;margin-bottom:14px}
+.ph p{font-size:.95rem;color:var(--text);margin-bottom:5px;font-weight:500}
+.spin{display:none;width:42px;height:42px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .65s linear infinite;position:relative;z-index:3}
+@keyframes sp{to{transform:rotate(360deg)}}
+.actrow{display:flex;gap:11px;margin-top:14px;flex-wrap:wrap}
+.dlbtn{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);border:none;border-radius:12px;padding:14px 28px;color:#fff;font-weight:700;font-size:.95rem;font-family:inherit;cursor:pointer;flex:1;min-width:150px;box-shadow:0 4px 18px rgba(124,92,252,.32);transition:all .2s}
+.dlbtn:hover{opacity:.9;transform:translateY(-2px)}
+.dlbtn:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.sec2{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 22px;color:var(--text);font-weight:600;font-size:.9rem;font-family:inherit;cursor:pointer;transition:all .2s}
+.sec2:hover{background:var(--border)}
+footer{text-align:center;padding:34px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem}
+footer span{background:linear-gradient(135deg,#7c5cfc,#fc5cf5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
 </style>
 </head>
 <body>
-<h2>🎮 AvatarGFX — Upload your avatar PNG below</h2>
-<canvas id="c" width="800" height="600"></canvas>
-<div class="btns">
-  <label>📁 Upload Avatar<input type="file" accept="image/*" onchange="loadImg(this)"/></label>
-  <button onclick="download()">⬇️ Download PNG</button>
+<nav>
+  <div class="logo">Avatar<b>GFX</b></div>
+  <div class="nav-pill">⚡ GFX Studio</div>
+</nav>
+<div class="hero">
+  <h1>Make Your Avatar<br/><em>Look Legendary</em></h1>
+  <p>Upload your Roblox avatar, pick a pose and style — download your GFX instantly.</p>
 </div>
+<div class="wrap">
+
+  <div class="card">
+    <div class="card-header"><div class="step-dot">1</div><div class="card-title">📁 Upload Your Avatar</div><div class="card-sub">PNG works best</div></div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])"/>
+      <div class="upload-icon">🎮</div>
+      <div class="upload-title">Drop your avatar image here</div>
+      <div class="upload-sub">Click to browse · PNG, JPG, WEBP</div>
+    </div>
+    <div class="upload-preview" id="uploadPreview">
+      <img id="previewThumb" src="" alt=""/>
+      <div style="flex:1"><div class="upload-preview-name" id="previewName"></div><div class="upload-preview-size" id="previewDims"></div></div>
+      <button style="background:var(--accent);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-weight:700;cursor:pointer;font-size:.8rem" onclick="document.getElementById('fileInput').click()">Change</button>
+    </div>
+    <p class="hint">💡 Save your avatar from roblox.com/users/ID/profile · Transparent PNG = best results</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="step-dot">2</div><div class="card-title">🕹️ Choose a Pose</div></div>
+    <div class="pose-grid">
+      <button class="pose-btn active" id="pose-hi" onclick="setPose('hi')"><div class="pi">👋</div><div class="pn">Hi / Wave</div><div class="pd">Waving pose</div></button>
+      <button class="pose-btn" id="pose-cool" onclick="setPose('cool')"><div class="pi">😎</div><div class="pn">Cool</div><div class="pd">Straight stance</div></button>
+      <button class="pose-btn" id="pose-running" onclick="setPose('running')"><div class="pi">🏃</div><div class="pn">Running</div><div class="pd">Forward lean</div></button>
+      <button class="pose-btn" id="pose-action" onclick="setPose('action')"><div class="pi">⚡</div><div class="pn">Action</div><div class="pd">Power stance</div></button>
+      <button class="pose-btn" id="pose-jumping" onclick="setPose('jumping')"><div class="pi">🦘</div><div class="pn">Jumping</div><div class="pd">Mid-air</div></button>
+      <button class="pose-btn" id="pose-sitting" onclick="setPose('sitting')"><div class="pi">🪑</div><div class="pn">Sitting</div><div class="pd">Relaxed</div></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="step-dot">3</div><div class="card-title">✨ Style</div></div>
+    <div class="grid2">
+      <div class="ctrl"><label>Gloss <span class="sv" id="glossV">70%</span></label><input type="range" id="glossSlider" min="0" max="100" value="70" oninput="sv('glossSlider','glossV')"/></div>
+      <div class="ctrl"><label>Rim Light <span class="sv" id="rimV">65%</span></label><input type="range" id="rimSlider" min="0" max="100" value="65" oninput="sv('rimSlider','rimV')"/></div>
+      <div class="ctrl"><label>Glow Size <span class="sv" id="glowV">55%</span></label><input type="range" id="glowSlider" min="0" max="100" value="55" oninput="sv('glowSlider','glowV')"/></div>
+      <div class="ctrl"><label>Avatar Scale <span class="sv" id="scaleV">80%</span></label><input type="range" id="scaleSlider" min="40" max="110" value="80" oninput="sv('scaleSlider','scaleV')"/></div>
+    </div>
+    <div class="div"></div>
+    <div class="grid2">
+      <div class="ctrl"><label>Gloss Tint</label>
+        <div class="swrow" id="glossColors">
+          <div class="sw active" style="background:linear-gradient(135deg,#fff,#ddd)" onclick="pickGloss([1,1,1],this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#c4b5fd,#7c5cfc)" onclick="pickGloss([.655,.361,.988],this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#fda4af,#f43f5e)" onclick="pickGloss([.984,.631,.686],this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#7dd3fc,#0ea5e9)" onclick="pickGloss([.220,.741,.914],this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#86efac,#16a34a)" onclick="pickGloss([.302,.937,.424],this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#fde68a,#f59e0b)" onclick="pickGloss([.984,.933,.290],this)"></div>
+        </div>
+      </div>
+      <div class="ctrl"><label>Background</label>
+        <div class="swrow" id="bgSwatches">
+          <div class="sw active" style="background:linear-gradient(135deg,#1a1a2e,#0f3460)" onclick="pickBg('space',this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#0d0d0d,#2d1b69)" onclick="pickBg('galaxy',this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#0f2027,#2c5364)" onclick="pickBg('ocean',this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#200122,#cc0000)" onclick="pickBg('fire',this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#134e5e,#71b280)" onclick="pickBg('forest',this)"></div>
+          <div class="sw" style="background:linear-gradient(135deg,#2b1055,#7597de)" onclick="pickBg('dawn',this)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="div"></div>
+    <div class="ctrl" style="margin-bottom:0"><label>Export Size</label>
+      <div class="sizetabs" id="sizeTabs">
+        <div class="stab" onclick="pickSize(600,400,this)">600×400</div>
+        <div class="stab active" onclick="pickSize(800,534,this)">800×534</div>
+        <div class="stab" onclick="pickSize(1200,800,this)">1200×800</div>
+      </div>
+    </div>
+    <button class="genbtn" id="genBtn" onclick="generate()" disabled>🎨 Generate GFX</button>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="step-dot">✓</div><div class="card-title">🖼️ Preview & Download</div></div>
+    <div class="preview-wrap" id="previewWrap">
+      <div class="ph" id="ph"><div class="phi">🎮</div><p>Your GFX will appear here</p><small style="color:var(--muted)">Upload avatar → Generate</small></div>
+      <div class="spin" id="spin"></div>
+      <canvas id="c"></canvas>
+    </div>
+    <div class="actrow">
+      <button class="dlbtn" id="dlBtn" onclick="doDownload()" disabled>⬇️ Download PNG</button>
+      <button class="sec2" onclick="generate()">🔄 Regenerate</button>
+    </div>
+  </div>
+</div>
+<footer>Made with ❤️ · <span>AvatarGFX</span> · GFX Studio</footer>
+
 <script>
-const canvas=document.getElementById('c');
-const ctx=canvas.getContext('2d');
-const W=800,H=600;
+const S={avatarImg:null,pose:'hi',glossColor:[1,1,1],bg:'space',W:800,H:534};
 
-// Draw immediately with placeholder
-drawScene(null);
+const zone=document.getElementById('uploadZone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleFile(f);});
 
-function loadImg(input){
-  const file=input.files[0];
-  if(!file)return;
+function handleFile(file){
+  if(!file||!file.type.startsWith('image/'))return;
   const reader=new FileReader();
   reader.onload=e=>{
     const img=new Image();
-    img.onload=()=>drawScene(img);
+    img.onload=()=>{
+      S.avatarImg=img;
+      document.getElementById('uploadPreview').style.display='flex';
+      document.getElementById('previewThumb').src=e.target.result;
+      document.getElementById('previewName').textContent=file.name;
+      document.getElementById('previewDims').textContent=`${img.width}×${img.height} · Ready ✅`;
+      document.getElementById('genBtn').disabled=false;
+    };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-function drawScene(avatarImg){
-  ctx.clearRect(0,0,W,H);
+function sv(id,lbl){document.getElementById(lbl).textContent=document.getElementById(id).value+'%';}
+function setPose(p){S.pose=p;document.querySelectorAll('.pose-btn').forEach(b=>b.classList.remove('active'));document.getElementById('pose-'+p).classList.add('active');}
+function pickGloss(c,el){S.glossColor=c;document.querySelectorAll('#glossColors .sw').forEach(s=>s.classList.remove('active'));el.classList.add('active');}
+function pickBg(b,el){S.bg=b;document.querySelectorAll('#bgSwatches .sw').forEach(s=>s.classList.remove('active'));el.classList.add('active');}
+function pickSize(w,h,el){S.W=w;S.H=h;document.querySelectorAll('#sizeTabs .stab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
 
-  // ── BACKGROUND ──────────────────────────────
-  // Deep dark gradient
-  const bgGrad=ctx.createRadialGradient(W*.5,H*.4,0,W*.5,H*.5,W*.85);
-  bgGrad.addColorStop(0,'#1a1535');
-  bgGrad.addColorStop(.5,'#0d0d1a');
-  bgGrad.addColorStop(1,'#050508');
+async function generate(){
+  if(!S.avatarImg)return;
+  document.getElementById('ph').style.display='none';
+  document.getElementById('c').style.display='none';
+  document.getElementById('spin').style.display='block';
+  await new Promise(r=>setTimeout(r,300));
+  document.getElementById('spin').style.display='none';
+  drawGFX();
+  document.getElementById('c').style.display='block';
+  document.getElementById('dlBtn').disabled=false;
+}
+
+function pseudoRand(s){const x=Math.sin(s)*43758.5453;return x-Math.floor(x);}
+
+function drawGFX(){
+  const canvas=document.getElementById('c');
+  const W=S.W,H=S.H;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  const gc=S.glossColor;
+  const gcss=(a)=>`rgba(${Math.round(gc[0]*255)},${Math.round(gc[1]*255)},${Math.round(gc[2]*255)},${a})`;
+
+  // ── BACKGROUND ──
+  const bgConfigs={
+    space:  {c0:'#0d0d1f',c1:'#111830',c2:'#0a0a14',glow:'rgba(80,40,220,0.3)'},
+    galaxy: {c0:'#080808',c1:'#1a0d30',c2:'#0d0520',glow:'rgba(120,40,200,0.25)'},
+    ocean:  {c0:'#071520',c1:'#0d2535',c2:'#051020',glow:'rgba(20,80,160,0.3)'},
+    fire:   {c0:'#1a0505',c1:'#2d0a00',c2:'#0d0000',glow:'rgba(200,40,0,0.3)'},
+    forest: {c0:'#060f06',c1:'#0d1f0d',c2:'#040a04',glow:'rgba(20,100,20,0.25)'},
+    dawn:   {c0:'#0f0520',c1:'#1a0d40',c2:'#280a50',glow:'rgba(100,60,220,0.3)'},
+  };
+  const bg=bgConfigs[S.bg]||bgConfigs.space;
+
+  // Base gradient
+  const bgGrad=ctx.createLinearGradient(0,0,0,H);
+  bgGrad.addColorStop(0,bg.c0);
+  bgGrad.addColorStop(0.5,bg.c1);
+  bgGrad.addColorStop(1,bg.c2);
   ctx.fillStyle=bgGrad;
   ctx.fillRect(0,0,W,H);
 
-  // Ground glow
-  const groundGlow=ctx.createRadialGradient(W*.5,H*.78,0,W*.5,H*.78,W*.45);
-  groundGlow.addColorStop(0,'rgba(100,60,255,0.35)');
-  groundGlow.addColorStop(.5,'rgba(60,20,180,0.15)');
-  groundGlow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=groundGlow;
-  ctx.fillRect(0,0,W,H);
-
-  // Ground floor reflection
-  const floorGrad=ctx.createLinearGradient(0,H*.72,0,H);
-  floorGrad.addColorStop(0,'rgba(80,40,200,0.18)');
-  floorGrad.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=floorGrad;
-  ctx.fillRect(0,H*.72,W,H*.28);
-
   // Stars
-  ctx.save();
-  for(let i=0;i<120;i++){
-    const x=pseudoRand(i*13.7)*W;
-    const y=pseudoRand(i*7.3)*H*.7;
-    const r=pseudoRand(i*3.1)*1.4+.3;
-    const a=pseudoRand(i*5.9)*.8+.2;
-    ctx.beginPath();
-    ctx.arc(x,y,r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${a})`;
-    ctx.fill();
+  for(let i=0;i<180;i++){
+    const x=pseudoRand(i*17.3)*W;
+    const y=pseudoRand(i*9.7)*H*.75;
+    const r=pseudoRand(i*4.1)*1.6+.2;
+    const a=pseudoRand(i*6.3)*.9+.1;
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.fill();
   }
-  ctx.restore();
 
-  // Nebula blobs
-  drawNebula(W*.2,H*.25,180,'rgba(120,60,255,0.07)');
-  drawNebula(W*.8,H*.2,220,'rgba(60,100,255,0.06)');
-  drawNebula(W*.5,H*.15,260,'rgba(200,60,255,0.04)');
+  // Ground glow
+  const groundGlow=ctx.createRadialGradient(W*.5,H*.78,0,W*.5,H*.78,W*.5);
+  groundGlow.addColorStop(0,bg.glow);
+  groundGlow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=groundGlow;ctx.fillRect(0,0,W,H);
 
-  // Grid floor lines
-  ctx.save();
-  ctx.globalAlpha=0.18;
-  ctx.strokeStyle='#7c5cfc';
-  ctx.lineWidth=1;
   // Perspective grid
-  const horizon=H*.72;
-  for(let i=0;i<=12;i++){
-    const t=i/12;
-    const x=W*t;
-    ctx.beginPath();
-    ctx.moveTo(W*.5,horizon);
-    ctx.lineTo(x,H);
-    ctx.stroke();
-  }
-  for(let i=0;i<=8;i++){
-    const t=i/8;
-    const y=horizon+t*(H-horizon);
-    const spread=t*W*.5;
-    ctx.beginPath();
-    ctx.moveTo(W*.5-spread,y);
-    ctx.lineTo(W*.5+spread,y);
-    ctx.stroke();
-  }
+  ctx.save();ctx.globalAlpha=0.15;ctx.strokeStyle=gcss(1);ctx.lineWidth=.8;
+  const hz=H*.73;
+  for(let i=0;i<=14;i++){const t=i/14;ctx.beginPath();ctx.moveTo(W*.5,hz);ctx.lineTo(W*t,H);ctx.stroke();}
+  for(let i=0;i<=7;i++){const t=i/7;const y=hz+(H-hz)*t;const sp=t*W*.5;ctx.beginPath();ctx.moveTo(W*.5-sp,y);ctx.lineTo(W*.5+sp,y);ctx.stroke();}
   ctx.restore();
 
-  // ── AVATAR ─────────────────────────────────
-  if(avatarImg){
-    const aH=H*.78;
-    const aW=aH*(avatarImg.width/avatarImg.height);
-    const ax=W*.5-aW*.5;
-    const ay=H*.5-aH*.62;
+  // Nebula
+  [[W*.15,H*.2,200],[W*.82,H*.25,160],[W*.5,H*.1,240]].forEach(([x,y,r])=>{
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0,gcss(.06));g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);
+  });
 
-    ctx.save();
-    ctx.translate(W*.5, H*.5);
+  // ── AVATAR ──
+  const img=S.avatarImg;
+  const scale=parseFloat(document.getElementById('scaleSlider').value)/100;
+  const gloss=parseFloat(document.getElementById('glossSlider').value)/100;
+  const rim=parseFloat(document.getElementById('rimSlider').value)/100;
+  const glow=parseFloat(document.getElementById('glowSlider').value)/100;
 
-    // HI POSE — arm up tilt
-    ctx.rotate(-0.08);
-    ctx.translate(-W*.5,-H*.5);
+  const aH=H*scale*1.05;
+  const aW=aH*(img.width/img.height);
+  const ax=W*.5-aW*.5;
+  const ay=H*.5-aH*.58;
 
-    // Shadow under avatar
-    const shadowGrad=ctx.createRadialGradient(W*.5,H*.76,0,W*.5,H*.76,aW*.6);
-    shadowGrad.addColorStop(0,'rgba(0,0,0,0.55)');
-    shadowGrad.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=shadowGrad;
-    ctx.fillRect(ax-aW*.3,H*.65,aW*1.6,H*.2);
+  ctx.save();
+  ctx.translate(W*.5,H*.5);
 
-    // Outer glow / rim light (left side — blue)
-    ctx.save();
-    ctx.filter='blur(22px)';
-    ctx.globalAlpha=0.55;
-    ctx.drawImage(avatarImg,ax-18,ay,aW,aH);
-    ctx.restore();
+  // POSE transforms
+  const poses={
+    hi:     {rot:-0.10, sx:0.04, sy:0.97, tx:0,    ty:0},
+    cool:   {rot:0,     sx:0,    sy:1,    tx:0,    ty:0},
+    running:{rot:-0.18, sx:0.12, sy:1,    tx:W*.02,ty:0},
+    action: {rot:0.13,  sx:-0.15,sy:1,    tx:0,    ty:0},
+    jumping:{rot:-0.08, sx:-0.05,sy:0.92, tx:0,    ty:-H*.04},
+    sitting:{rot:0.05,  sx:0.06, sy:0.85, tx:0,    ty:H*.04},
+  };
+  const pose=poses[S.pose]||poses.cool;
+  ctx.rotate(pose.rot);
+  ctx.transform(1,0,pose.sx,pose.sy,pose.tx,pose.ty);
+  ctx.translate(-W*.5,-H*.5);
 
-    // Outer glow / rim light (right side — purple)
-    ctx.save();
-    ctx.filter='blur(18px)';
-    ctx.globalAlpha=0.4;
-    // tint purple
-    const offscreen=document.createElement('canvas');
-    offscreen.width=aW;offscreen.height=aH;
-    const oc=offscreen.getContext('2d');
-    oc.drawImage(avatarImg,0,0,aW,aH);
-    oc.globalCompositeOperation='source-atop';
-    oc.fillStyle='rgba(124,92,252,0.6)';
-    oc.fillRect(0,0,aW,aH);
-    ctx.drawImage(offscreen,ax+18,ay,aW,aH);
-    ctx.restore();
+  // Shadow
+  const shadowG=ctx.createRadialGradient(W*.5,H*.76,0,W*.5,H*.76,aW*.7);
+  shadowG.addColorStop(0,'rgba(0,0,0,0.6)');shadowG.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=shadowG;ctx.fillRect(ax-aW*.3,H*.65,aW*1.6,H*.25);
 
-    // Main avatar
-    ctx.drawImage(avatarImg,ax,ay,aW,aH);
-
-    // Gloss overlay on avatar
-    ctx.save();
-    // clip to avatar bounds roughly
-    ctx.beginPath();
-    ctx.rect(ax,ay,aW,aH);
-    ctx.clip();
-
-    // Top-left specular highlight
-    const spec=ctx.createRadialGradient(ax+aW*.28,ay+aH*.12,0,ax+aW*.28,ay+aH*.12,aW*.45);
-    spec.addColorStop(0,'rgba(255,255,255,0.38)');
-    spec.addColorStop(.3,'rgba(255,255,255,0.12)');
-    spec.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=spec;
-    ctx.fillRect(ax,ay,aW,aH*.6);
-
-    // Fresnel rim right edge
-    const rimR=ctx.createLinearGradient(ax+aW*.7,0,ax+aW,0);
-    rimR.addColorStop(0,'rgba(124,92,252,0)');
-    rimR.addColorStop(1,'rgba(124,92,252,0.45)');
-    ctx.fillStyle=rimR;
-    ctx.fillRect(ax+aW*.7,ay,aW*.3,aH);
-
-    // Fresnel rim left edge
-    const rimL=ctx.createLinearGradient(ax,0,ax+aW*.3,0);
-    rimL.addColorStop(0,'rgba(60,120,255,0.35)');
-    rimL.addColorStop(1,'rgba(60,120,255,0)');
-    ctx.fillStyle=rimL;
-    ctx.fillRect(ax,ay,aW*.3,aH);
-
-    // Shimmer diagonal band
-    ctx.save();
-    ctx.globalAlpha=0.12;
-    ctx.rotate(0.5);
-    const shimmer=ctx.createLinearGradient(0,-200,200,200);
-    shimmer.addColorStop(0,'rgba(255,255,255,0)');
-    shimmer.addColorStop(.5,'rgba(255,255,255,0.9)');
-    shimmer.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=shimmer;
-    ctx.fillRect(ax-100,ay-100,aW*1.5,aH*1.5);
-    ctx.restore();
-
-    ctx.restore(); // end clip
-
-    // Reflection on floor
-    ctx.save();
-    ctx.translate(W*.5,H*.74);
-    ctx.scale(1,-0.18);
-    ctx.globalAlpha=0.22;
-    ctx.filter='blur(3px)';
-    ctx.drawImage(avatarImg,-aW*.5,0,aW,aH);
-    ctx.restore();
-
-    ctx.restore(); // end pose transform
-
-    // "HI" text effect — raised hand indicator
-    ctx.save();
-    ctx.font='bold 52px sans-serif';
-    ctx.fillStyle='rgba(255,255,255,0.9)';
-    ctx.shadowColor='#7c5cfc';
-    ctx.shadowBlur=20;
-    ctx.fillText('👋',W*.68,H*.22);
-    ctx.restore();
-
-  } else {
-    // placeholder text
-    ctx.fillStyle='rgba(255,255,255,0.2)';
-    ctx.font='600 22px sans-serif';
-    ctx.textAlign='center';
-    ctx.fillText('Upload your avatar PNG to generate GFX',W/2,H/2);
-    ctx.textAlign='left';
+  // Outer glow
+  if(glow>.05){
+    ctx.save();ctx.filter=`blur(${16+glow*30}px)`;ctx.globalAlpha=glow*.6;
+    ctx.drawImage(img,ax,ay,aW,aH);ctx.restore();
   }
 
-  // ── FOREGROUND FX ───────────────────────────
+  // Colored rim glow left (blue)
+  ctx.save();ctx.filter=`blur(${12+rim*18}px)`;ctx.globalAlpha=rim*.5;
+  const offL=document.createElement('canvas');offL.width=aW;offL.height=aH;
+  const ocL=offL.getContext('2d');ocL.drawImage(img,0,0,aW,aH);
+  ocL.globalCompositeOperation='source-atop';ocL.fillStyle=`rgba(60,120,255,0.7)`;ocL.fillRect(0,0,aW,aH);
+  ctx.drawImage(offL,ax-rim*12,ay,aW,aH);ctx.restore();
 
-  // Lens flare top-left
-  drawFlare(W*.22,H*.18);
+  // Colored rim glow right (gloss color)
+  ctx.save();ctx.filter=`blur(${10+rim*14}px)`;ctx.globalAlpha=rim*.45;
+  const offR=document.createElement('canvas');offR.width=aW;offR.height=aH;
+  const ocR=offR.getContext('2d');ocR.drawImage(img,0,0,aW,aH);
+  ocR.globalCompositeOperation='source-atop';ocR.fillStyle=gcss(.7);ocR.fillRect(0,0,aW,aH);
+  ctx.drawImage(offR,ax+rim*12,ay,aW,aH);ctx.restore();
+
+  // Main avatar
+  ctx.drawImage(img,ax,ay,aW,aH);
+
+  // Gloss overlay
+  if(gloss>.02){
+    ctx.save();
+    ctx.beginPath();ctx.rect(ax,ay,aW,aH);ctx.clip();
+    // Specular highlight top-left
+    const spec=ctx.createRadialGradient(ax+aW*.25,ay+aH*.1,0,ax+aW*.25,ay+aH*.1,aW*.5);
+    spec.addColorStop(0,gcss(.45*gloss));
+    spec.addColorStop(.35,gcss(.15*gloss));
+    spec.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=spec;ctx.fillRect(ax,ay,aW,aH*.65);
+    // Rim right
+    const rimRG=ctx.createLinearGradient(ax+aW*.65,0,ax+aW,0);
+    rimRG.addColorStop(0,'rgba(0,0,0,0)');rimRG.addColorStop(1,gcss(.5*rim));
+    ctx.fillStyle=rimRG;ctx.fillRect(ax+aW*.65,ay,aW*.35,aH);
+    // Rim left
+    const rimLG=ctx.createLinearGradient(ax,0,ax+aW*.35,0);
+    rimLG.addColorStop(0,'rgba(60,120,255,'+(0.4*rim)+')');
+    rimLG.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=rimLG;ctx.fillRect(ax,ay,aW*.35,aH);
+    // Shimmer band
+    ctx.save();ctx.globalAlpha=.09*gloss;ctx.rotate(.45);
+    const sh=ctx.createLinearGradient(-100,-200,300,400);
+    sh.addColorStop(0,'rgba(255,255,255,0)');sh.addColorStop(.5,'rgba(255,255,255,1)');sh.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=sh;ctx.fillRect(ax-200,ay-200,aW*2,aH*2);ctx.restore();
+    ctx.restore();
+  }
+
+  // Floor reflection
+  ctx.save();
+  ctx.translate(W*.5,H*.75);ctx.scale(1,-0.15);
+  ctx.globalAlpha=0.18;ctx.filter='blur(4px)';
+  ctx.drawImage(img,-aW*.5,0,aW,aH);
+  ctx.restore();
+
+  // Pose emoji
+  if(S.pose==='hi'){
+    ctx.save();
+    ctx.font=`bold ${Math.round(W*.065)}px sans-serif`;
+    ctx.globalAlpha=.92;
+    ctx.shadowColor=gcss(1);ctx.shadowBlur=22;
+    ctx.fillText('👋',ax+aW*.72,ay+aH*.18);
+    ctx.restore();
+  }
+
+  ctx.restore(); // end pose
+
+  // ── FOREGROUND ──
+  // Lens flare
+  ctx.save();ctx.globalCompositeOperation='screen';
+  const lf=ctx.createRadialGradient(W*.2,H*.15,0,W*.2,H*.15,100);
+  lf.addColorStop(0,'rgba(255,240,200,0.14)');lf.addColorStop(.4,gcss(.06));lf.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=lf;ctx.fillRect(0,0,W*.5,H*.4);
+  ctx.restore();
 
   // Vignette
-  const vig=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,W*.75);
-  vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(1,'rgba(0,0,0,0.72)');
-  ctx.fillStyle=vig;
-  ctx.fillRect(0,0,W,H);
-
-  // Chromatic aberration edges
-  ctx.save();
-  ctx.globalCompositeOperation='screen';
-  ctx.globalAlpha=0.04;
-  ctx.fillStyle='#ff0000';
-  ctx.fillRect(0,0,8,H);
-  ctx.fillRect(W-8,0,8,H);
-  ctx.fillStyle='#0000ff';
-  ctx.fillRect(2,0,8,H);
-  ctx.fillRect(W-10,0,8,H);
-  ctx.restore();
+  const vig=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,W*.8);
+  vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,0.75)');
+  ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
 
   // Film grain
-  ctx.save();
-  ctx.globalAlpha=0.032;
-  for(let i=0;i<W*H/120;i++){
-    const x=Math.random()*W,y=Math.random()*H;
+  ctx.save();ctx.globalAlpha=.028;
+  for(let i=0;i<W*H/100;i++){
     ctx.fillStyle=Math.random()>.5?'#fff':'#000';
-    ctx.fillRect(x,y,1,1);
+    ctx.fillRect(Math.random()*W,Math.random()*H,1,1);
   }
   ctx.restore();
 
   // Watermark
-  ctx.save();
-  ctx.font='600 13px sans-serif';
-  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.font=`600 ${Math.round(W*.016)}px Inter`;
+  ctx.fillStyle='rgba(255,255,255,0.2)';
   ctx.textAlign='right';
-  ctx.fillText('AvatarGFX · WebGL Edition',W-16,H-14);
-  ctx.restore();
+  ctx.fillText('AvatarGFX · GFX Studio',W-14,H-12);
 }
 
-function drawNebula(x,y,r,color){
-  const g=ctx.createRadialGradient(x,y,0,x,y,r);
-  g.addColorStop(0,color);
-  g.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=g;
-  ctx.fillRect(x-r,y-r,r*2,r*2);
-}
-
-function drawFlare(x,y){
-  ctx.save();
-  ctx.globalCompositeOperation='screen';
-  const g=ctx.createRadialGradient(x,y,0,x,y,90);
-  g.addColorStop(0,'rgba(255,240,200,0.18)');
-  g.addColorStop(.3,'rgba(200,160,255,0.08)');
-  g.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=g;
-  ctx.fillRect(x-90,y-90,180,180);
-  // streaks
-  ctx.strokeStyle='rgba(255,255,255,0.07)';
-  ctx.lineWidth=1;
-  for(let a=0;a<Math.PI*2;a+=Math.PI/6){
-    ctx.beginPath();
-    ctx.moveTo(x,y);
-    ctx.lineTo(x+Math.cos(a)*120,y+Math.sin(a)*120);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function pseudoRand(seed){
-  const s=Math.sin(seed)*43758.5453;
-  return s-Math.floor(s);
-}
-
-function download(){
+function doDownload(){
   const a=document.createElement('a');
-  a.download='avatargfx.png';
-  a.href=canvas.toDataURL('image/png');
+  a.download=`avatargfx-${S.pose}-${S.W}x${S.H}.png`;
+  a.href=document.getElementById('c').toDataURL('image/png');
   a.click();
 }
 </script>
 </body>
 </html>
-
